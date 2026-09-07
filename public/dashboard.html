@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Numerología</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    <nav class="navbar">
+        <div class="nav-content">
+            <h1 class="logo-small">Numerología</h1>
+            <div class="user-menu">
+                <span id="user-name">Cargando...</span>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Salir</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        
+        <div class="card" id="profile-card" style="display: none;">
+            <div class="card-header">
+                <h2>Tu Perfil Numerológico</h2>
+            </div>
+            <div class="card-body">
+                <div class="numbers-grid">
+                    <div class="number-box">
+                        <h3>Número de Vida</h3>
+                        <div class="big-number" id="vida-num">-</div>
+                        <p>Tu propósito principal en la vida y el camino que transitarás.</p>
+                    </div>
+                    <div class="number-box">
+                        <h3>Número de Expresión</h3>
+                        <div class="big-number" id="exp-num">-</div>
+                        <p>Tus talentos naturales y habilidades innatas.</p>
+                    </div>
+                    <div class="number-box">
+                        <h3>Número de Alma</h3>
+                        <div class="big-number" id="alma-num">-</div>
+                        <p>Tus deseos más profundos y motivación interna.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="calc-card" style="display: none;">
+            <div class="card-header">
+                <h2>Calcular Matriz Numerológica</h2>
+                <p class="subtitle">Aún no tienes un perfil. Generemos tus números basados en tu nombre y fecha de nacimiento.</p>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-primary btn-large" id="btn-calc" onclick="calculateMatrix()">Calcular Mis Números Mágicos</button>
+                <div class="error-msg" id="calc-error"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

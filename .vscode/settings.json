@@ -1,0 +1,10 @@
+{
+    "files.exclude": {
+        "**/.env": false,
+        "**/pnpm-lock.yaml": true,
+        "**/package-lock.json": true,
+        "**/.gitignore": true,
+        "**/.gitattributes": true,
+        "node_modules": true,
+    }
+}
