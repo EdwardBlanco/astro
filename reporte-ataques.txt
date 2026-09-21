@@ -1,0 +1,150 @@
+Formato para cada ataque:
+
+ATAQUE #__ : (nombre)
+Petición: MÉTODO /ruta
+Body: { ... }
+Respondió: código HTTP + lo que devolvió
+Veredicto: DEFENDIDO / VULNERABLE
+Qué noté: (qué esperabas que pasara vs qué pasó)
+
+ATAQUE #1 : POST con campos obligatorios faltantes
+Petición: POST /api/v1/auth/register
+Body:
+{
+  "email": "prueba@test.com"
+}
+Respondió: 400 Bad Request
+Respuesta del servidor:
+{
+	"mensaje": "Error de validación",
+	"errores": [
+		{
+			"campo": "nombre_completo",
+			"mensaje": "El nombre completo es obligatorio"
+		},
+		{
+			"campo": "password_hash",
+			"mensaje": "La contraseña es obligatoria"
+		},
+		{
+			"campo": "fecha_nacimiento",
+			"mensaje": "La fecha de nacimiento es obligatoria"
+		}
+	]
+}
+Veredicto: DEFENDIDO
+
+
+ATAQUE #2 : POST con body totalmente vacío
+Petición: POST /api/v1/auth/register
+Body: {}
+Respondió: 400 Bad Request
+Respuesta del servidor:
+{
+	"mensaje": "Error de validación",
+	"errores": [
+		{
+			"campo": "nombre_completo",
+			"mensaje": "El nombre completo es obligatorio"
+		},
+		{
+			"campo": "email",
+			"mensaje": "El email es obligatorio"
+		},
+		{
+			"campo": "password_hash",
+			"mensaje": "La contraseña es obligatoria"
+		},
+		{
+			"campo": "fecha_nacimiento",
+			"mensaje": "La fecha de nacimiento es obligatoria"
+		}
+	]
+}
+Veredicto: DEFENDIDO
+
+ATAQUE #3 : Tipos de datos alterados
+Petición: POST /api/v1/auth/register
+Body:
+{
+  "nombre_completo": 12345,
+  "email": 333,
+  "password_hash": 232342342,
+  "fecha_nacimiento": true
+}
+Respondió: 400 Bad Request
+Respuesta del servidor:
+{
+	"mensaje": "Error de validación",
+	"errores": [
+		{
+			"campo": "email",
+			"mensaje": "Debe proporcionar un email válido"
+		},
+		{
+			"campo": "fecha_nacimiento",
+			"mensaje": "La fecha debe tener formato válido (YYYY-MM-DD)"
+		}
+	]
+}
+Veredicto: VULNERABLE
+Qué noté: La API no validó el número en los campos nombre_completo y password_hash. La API aceptó un tipo numérico.
+
+
+ATAQUE #4 : Vacío disfrazado con espacios
+Petición: POST /api/v1/auth/register
+Body:
+{
+  "nombre_completo": "  ",
+  "email": "  ",
+  "password_hash": "  ",
+  "fecha_nacimiento": "  "
+}
+Respondió: 400 Bad Request
+Respuesta del servidor:
+{
+	"mensaje": "Error de validación",
+	"errores": [
+		{
+			"campo": "nombre_completo",
+			"mensaje": "El nombre completo es obligatorio"
+		},
+		{
+			"campo": "email",
+			"mensaje": "El email es obligatorio"
+		},
+		{
+			"campo": "password_hash",
+			"mensaje": "La contraseña debe tener al menos 6 caracteres"
+		},
+		{
+			"campo": "fecha_nacimiento",
+			"mensaje": "La fecha debe tener formato válido (YYYY-MM-DD)"
+		}
+	]
+}
+Veredicto: DEFENDIDO
+
+ATAQUE #5 : Inyección de campos no permitidos en el body
+Petición: POST /api/v1/auth/register
+Body:
+{
+  "nombre_completo": "Edward B",
+  "email": "admin_test2@test.com",
+  "password_hash": "123456",
+  "fecha_nacimiento": "1990-01-01",
+  "role": "admin",
+  "isAdmin": true
+}
+Respondió: 400 Bad Request
+Respuesta del servidor:
+{
+	"mensaje": "Error de validación",
+	"errores": [
+		{
+			"campo": "role",
+			"mensaje": "Rol inválido. Solo se permiten los roles definidos en el ENUM"
+		}
+	]
+}
+Veredicto: DEFENDIDO

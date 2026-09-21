@@ -1,0 +1,140 @@
+1. Módulo de Autenticación (/api/v1/auth)
+•	Ataque 1: POST con campos obligatorios faltantes
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register)
+
+o	Body:
+JSON
+{
+  "email": "prueba@test.com"
+}
+o	Qué evaluar: Verificar si responde con 400 Bad Request indicando qué campos faltan o si la API revienta con un error 500. 
+
+•	Ataque 2: POST con body totalmente vacío
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register)
+
+o	Body: {}
+
+o	Qué evaluar: Control de peticiones sin parámetros. 
+
+•	Ataque 3: Tipos de datos alterados
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register)
+
+o	Body:
+JSON
+{
+  "nombre_completo": 12345,
+  "email": "test@test.com",
+  "password_hash": "123456",
+  "fecha_nacimiento": true
+}
+o	Qué evaluar: Validación de tipos en el servidor. 
+
+•	Ataque 4: Vacío disfrazado con espacios
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register)
+
+o	Body:
+JSON
+{
+  "nombre_completo": "   ",
+  "email": "juan@test.com",
+  "password_hash": "123456",
+  "fecha_nacimiento": "1995-05-10"
+}
+o	Qué evaluar: Verificar si la API ejecuta .trim() antes de comprobar .notEmpty(). 
+
+•	Ataque 7: Mass Assignment (Inyección de campos no permitidos en POST)
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/register)
+
+o	Body:
+JSON
+{
+  "nombre_completo": "Ataque Mass",
+  "email": "admin_test@test.com",
+  "password_hash": "123456",
+  "fecha_nacimiento": "1990-01-01",
+  "role": "admin",
+  "isAdmin": true
+}
+o	Qué evaluar: Realizar un GET /api/v1/numerology/profile posterior para confirmar si guardó los privilegios administrativos en la base de datos. 
+
+•	Ataque 11: Verbo HTTP no permitido
+
+o	Ruta: DELETE [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/login](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/auth/login)
+
+o	Qué evaluar: Comprobar la respuesta ante métodos no implementados en la ruta. 
+
+2. Módulo de Lecturas (/api/v1/readings)
+•	Ataque 5: Valor inventado en un campo Enum
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/readings/generate](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/readings/generate) (Requiere Token)
+
+o	Body:
+JSON
+{
+  "prompt_enviado": "Lectura del día",
+  "respuesta_generada": "Resultado...",
+  "tipo_lectura": "LECTURA_INVALIDA_INEXISTENTE"
+}
+o	Qué evaluar: Verificación de listas de opciones cerradas. 
+
+•	Ataque 6: Inyección de texto de gran longitud
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/readings/generate](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/readings/generate) (Requiere Token)
+
+o	Body: Enviar un prompt_enviado con una cadena de más de 10.000 caracteres. 
+
+o	Qué evaluar: Confirmar si el sistema aplica un límite max de tamaño. 
+
+3. Módulo de Numerología y Gestión de IDs (/api/v1/numerology)
+•	Ataque 9: Formato de ID de MongoDB inválido
+
+o	Ruta: GET [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/numerology/profile/123abc_invalid_id](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/numerology/profile/123abc_invalid_id) (Requiere Token)
+
+o	Qué evaluar: Comprobar si responde con 400 Bad Request o con un fallo 500 CastError sin capturar. 
+
+•	Ataque 10: ID con formato válido pero inexistente
+
+o	Ruta: GET [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/numerology/profile/60f71b2f9f1b2c0015f8e999](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/numerology/profile/60f71b2f9f1b2c0015f8e999) (Requiere Token)
+
+o	Qué evaluar: Comprobar si devuelve un 404 Not Found en lugar de 200 OK con un valor nulo. 
+
+•	Ataque 14: Actualización parcial incompleta
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/numerology/calculate](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/numerology/calculate) (Requiere Token)
+
+o	Body:
+JSON
+{
+  "numero_vida": 7
+}
+o	Qué evaluar: Consultar el recurso tras la petición para verificar si los demás parámetros (numero_expresion, numero_alma) se mantuvieron o si fueron sobrescritos como undefined/null. 
+
+4. Módulo de Compatibilidad y Relaciones (/api/v1/compatibility)
+•	Ataque 12: Referencia a un ObjectId inexistente en la BD
+
+o	Ruta: POST [https://z77tpjvp-3000.use.devtunnels.ms/api/v1/compatibility/check](https://z77tpjvp-3000.use.devtunnels.ms/api/v1/compatibility/check) (Requiere Token)
+
+o	Body:
+JSON
+{
+  "user_id_2": "60f71b2f9f1b2c0015f8e888",
+  "puntaje": 85,
+  "interpretacion_ia": "Buena compatibilidad"
+}
+o	Qué evaluar: Determinar si la API verifica la existencia del usuario objetivo antes de asociar el registro en la base de datos. 
+
+•	Ataque 13: Consulta de registros con relaciones eliminadas
+
+o	Pasos:
+1.	Crear un registro de compatibilidad. 
+
+2.	Eliminar la cuenta asociada a user_id_2. 
+
+3.	Hacer una petición a la ruta que ejecuta .populate(). 
+
+o	Qué evaluar: Verificar cómo gestiona Mongoose la consulta cuando el documento referenciado ha dejado de existir.
